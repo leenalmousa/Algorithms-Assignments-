@@ -1,0 +1,322 @@
+#include <iostream>
+#include <list>
+#include <vector>
+#include <queue>
+#include <climits>
+#include <cmath>
+#include <cassert>
+#include <string>
+
+using namespace std;
+
+template<class T>
+class MinPQ {
+public:
+    MinPQ(int maxN);
+    ~MinPQ();
+
+    bool isEmpty() const;
+    int size() const;
+
+    void insert(int i, T key);
+    int delMin();
+    void remove(int i);
+
+    int minIndex() const;
+    T minKey() const;
+
+    bool contains(int i) const;
+    T keyOf(int i) const;
+
+    void changeKey(int i, T key);
+    void decreaseKey(int i, T key);
+    void increaseKey(int i, T key);
+
+private:
+    int maxN;
+    int n;
+    int* pq;
+    int* qp;
+    T* keys;
+
+    void validateIndex(int i) const;
+    bool greater(int i, int j) const;
+    void exch(int i, int j);
+    void swim(int k);
+    void sink(int k);
+};
+
+template<class T>
+MinPQ<T>::MinPQ(int maxN) {
+    if (maxN < 0) throw string("Size can't be negative");
+    this->maxN = maxN;
+    n = 0;
+
+    keys = new T[maxN + 1];
+    pq = new int[maxN + 1];
+    qp = new int[maxN + 1];
+    for (int i = 0; i <= maxN; i++)
+        qp[i] = -1;
+}
+
+template<class T>
+MinPQ<T>::~MinPQ() {
+    delete[] pq;
+    delete[] qp;
+    delete[] keys;
+}
+
+template<class T>
+bool MinPQ<T>::isEmpty() const { return n == 0; }
+
+template<class T>
+int MinPQ<T>::size() const { return n; }
+
+template<class T>
+bool MinPQ<T>::contains(int i) const {
+    validateIndex(i);
+    return qp[i] != -1;
+}
+
+template<class T>
+void MinPQ<T>::insert(int i, T key) {
+    validateIndex(i);
+    if (contains(i)) throw string("index is already in the priority queue");
+    n++;
+    qp[i] = n;
+    pq[n] = i;
+    keys[i] = key;
+    swim(n);
+}
+
+template<class T>
+int MinPQ<T>::minIndex() const {
+    if (n == 0) throw string("Priority queue underflow");
+    return pq[1];
+}
+
+template<class T>
+T MinPQ<T>::minKey() const {
+    if (n == 0) throw string("Priority queue underflow");
+    return keys[pq[1]];
+}
+
+template<class T>
+int MinPQ<T>::delMin() {
+    if (n == 0) throw string("Priority queue underflow");
+    int min = pq[1];
+    exch(1, n--);
+    sink(1);
+    assert(min == pq[n + 1]);
+    qp[min] = -1;
+    pq[n + 1] = -1;
+    return min;
+}
+
+template<class T>
+T MinPQ<T>::keyOf(int i) const {
+    validateIndex(i);
+    if (!contains(i)) throw string("index is not in the priority queue");
+    else return keys[i];
+}
+
+template<class T>
+void MinPQ<T>::changeKey(int i, T key) {
+    validateIndex(i);
+    if (!contains(i)) throw string("index is not in the priority queue");
+    keys[i] = key;
+    swim(qp[i]);
+    sink(qp[i]);
+}
+
+template<class T>
+void MinPQ<T>::decreaseKey(int i, T key) {
+    validateIndex(i);
+    if (!contains(i))
+        throw string("index is not in the priority queue");
+    if (keys[i] == key)
+        throw string("Calling decreaseKey() with a key equal to the key in the priority queue");
+    if (keys[i] < key)
+        throw string("Calling decreaseKey() with a key > the key in the priority queue");
+    keys[i] = key;
+    swim(qp[i]);
+}
+
+template<class T>
+void MinPQ<T>::increaseKey(int i, T key) {
+    validateIndex(i);
+    if (!contains(i))
+        throw string("index is not in the priority queue");
+    if (keys[i] == key)
+        throw string("Calling increaseKey() with a key equal to the key in the priority queue");
+    if (keys[i] > key)
+        throw string("Calling increaseKey() with a key < the key in the priority queue");
+    keys[i] = key;
+    sink(qp[i]);
+}
+
+template<class T>
+void MinPQ<T>::remove(int i) {
+    validateIndex(i);
+    if (!contains(i))
+        throw string("index is not in the priority queue");
+    int index = qp[i];
+    exch(index, n--);
+    swim(index);
+    sink(index);
+    qp[i] = -1;
+}
+
+template<class T>
+void MinPQ<T>::validateIndex(int i) const {
+    if (i < 0) throw string("index is negative: ");
+    if (i >= maxN) throw string("index >= capacity: ");
+}
+
+template<class T>
+bool MinPQ<T>::greater(int i, int j) const {
+    return keys[pq[i]] > keys[pq[j]];
+}
+
+template<class T>
+void MinPQ<T>::exch(int i, int j) {
+    int swap = pq[i];
+    pq[i] = pq[j];
+    pq[j] = swap;
+    qp[pq[i]] = i;
+    qp[pq[j]] = j;
+}
+
+template<class T>
+void MinPQ<T>::swim(int k) {
+    while (k > 1 && greater(k / 2, k)) {
+        exch(k, k / 2);
+        k = k / 2;
+    }
+}
+
+template<class T>
+void MinPQ<T>::sink(int k) {
+    while (2 * k <= n) {
+        int j = 2 * k;
+        if (j < n && greater(j, j + 1)) j++;
+        if (!greater(k, j)) break;
+        exch(k, j);
+        k = j;
+    }
+}
+
+double toRadians(const double& degree) {
+    return (M_PI / 180) * degree;
+}
+
+double ComputeDistance(double lat1, double long1, double lat2, double long2) {
+    lat1 = toRadians(lat1);
+    long1 = toRadians(long1);
+    lat2 = toRadians(lat2);
+    long2 = toRadians(long2);
+
+    double dlong = long2 - long1;
+    double dlat = lat2 - lat1;
+
+    double ans = pow(sin(dlat / 2), 2) +
+                 cos(lat1) * cos(lat2) * pow(sin(dlong / 2), 2);
+
+    ans = 2 * asin(sqrt(ans));
+
+    // Radius of Earth in Kilometers, R = 6371
+    // Use R = 3956 for miles
+    double R = 6371;
+
+    // Calculate the result
+    ans = ans * R;
+
+    return ans;
+}
+
+class Edge {
+public:
+    int from;
+    int to;
+    double weight;
+
+    Edge(int from, int to, double weight) {
+        this->from = from;
+        this->to = to;
+        this->weight = weight;
+    }
+};
+
+class Graph {
+public:
+    int V;
+    list<Edge>* adj;
+
+    Graph(int V) {
+        this->V = V;
+        adj = new list<Edge>[V];
+    }
+
+    ~Graph() {
+        delete[] adj;
+    }
+
+    void add_edge(int v, int w, double weight) {
+        adj[v].push_back(Edge(v, w, weight));
+        adj[w].push_back(Edge(w, v, weight));
+    }
+
+    double MST() {
+        MinPQ<double> pq(V);
+        vector<int> parent(V, -1);
+        int src = 0;
+        for (int i = 0; i < V; i++)
+            pq.insert(i, INT_MAX);
+        parent[src] = 0;
+        double sum = 0;
+        pq.changeKey(0, 0);
+        while (!pq.isEmpty()) {
+            int v = pq.minIndex();
+            double value = pq.minKey();
+            sum += pq.minKey();
+            pq.delMin();
+            for (Edge w : adj[v]) {
+                if (pq.contains(w.to)) {
+                    if (w.weight < pq.keyOf(w.to)) {
+                        pq.decreaseKey(w.to, w.weight);
+                        parent[w.to] = v;
+                    }
+                }
+            }
+        }
+        return sum;
+    }
+
+    void print() {
+        for (int v = 0; v < V; v++) {
+            cout << "[" << v << "]: ";
+            for (Edge i : adj[v])
+                cout << i.to << ", " << i.weight << "-";
+            cout << endl;
+        }
+    }
+};
+
+double find_weight(double latitude1, double longitude1, double latitude2, double longitude2, double line_lat) {
+    double d = abs(ComputeDistance(latitude1, longitude1, latitude2, longitude2));
+    if ((latitude1 - line_lat) * (latitude2 - line_lat) >= 0)
+        return d;
+    else return 4 * d;
+}
+
+double GetMinRoadsNetworkCost(int N, double latitude[], double longitude[], double line_lat) {
+    Graph gr(N);
+    for (int i = 0; i < N; i++)
+        for (int j = 0; j < N; j++) {
+            double d = find_weight(latitude[i], longitude[i], latitude[j], longitude[j], line_lat);
+            gr.add_edge(i, j, d);
+        }
+
+    double distance = gr.MST();
+    return distance;
+}
