@@ -1,0 +1,301 @@
+#include <algorithm>
+#include <iostream>
+#include <chrono>
+#include <vector>
+using namespace std;
+using namespace std;
+using namespace std::chrono;
+
+// Provide your solution for the  question here //
+
+int  find_max(int a[],int n){
+	int max=a[0];
+	for( int i=0;i<n;i++ ){
+		if(max<a[i])
+		 max=a[i];
+	} 
+return max;
+}
+
+
+int  find_min(int a[],int n){
+	int min=a[0];
+	for( int i=0;i<n;i++ ){
+		if(min>a[i])
+	  	min=a[i];
+	}
+return min;
+}
+
+
+void algorithm_A(int a[], int n){
+ int min = find_min(a, n);
+ int max = find_max(a, n);
+ int range = max - min + 2;
+ vector<int> array(range, 0);
+ for (int i = 0; i < n; i++) {
+    array[a[i] - min]++;
+ }
+ for (int i = 1; i < range; i++) {
+    array[i] = array[i - 1] + array[i];
+ }
+ vector<int> Sorted_Original_Array(n, 0);
+ for (int i = n - 1; i >= 0; i--) {
+    int temp = a[i] - min;
+    int temp2 = array[temp];
+    Sorted_Original_Array[temp2 - 1] = a[i]; 
+    array[temp]--;
+ }
+ for( int i=0;i<n;i++)
+ a[i]=Sorted_Original_Array[i];
+}
+
+
+void merge(vector <int> &a,int first ,int mid, int last,int result[]){
+	int size=last-first+1;
+	int i=first;
+	int j=mid+1;
+	for(int k=0;k<size;k++){
+		if (i > mid) result[k] = a[j++];
+		else if( j > last) result[k] = a[i++];
+		else if( a[i] <= a[j]) result[k] = a[i++];
+		else result[k] = a[j++]	;
+  }
+	for(int i=0;i<size;i++)
+  	a[first+i]=result[i];
+}
+
+void insertion(vector <int>& a, int n) {
+ for (int i = 1; i < n; i++) {
+    int temp = a[i];
+    int j;
+    for (j = i-1; j >= 0 && temp < a[j]; j--)
+        a[j+1] = a[j];
+    a[j+1] = temp;
+ }
+}
+
+ void mergesort(vector <int> &a,int first, int last,int result[]){
+	if(first>=last)return;
+	int mid=first+ (last-first)/2;
+	if( mid-first==1000||last-mid==1000) insertion(a,last-first+1);
+	mergesort(a,first,mid,result);
+	mergesort(a,mid+1,last,result);
+	merge(a,first,mid,last,result);
+ }
+
+
+void algorithm_B(int a[], int n) {
+	vector <int>v (n,0);
+  for( int i=0;i<n;i++)
+     v[i]=a[i];
+  mergesort(v,0,n-1,a);
+	for( int i=0;i<n;i++)
+	    a[i]=v[i];
+} 
+		
+
+
+		
+int partition (int a[],int first ,int last ){
+ int j=first;
+ int i=last+1;
+ int p=a[first];
+ while(1){
+   do(j++);
+   while(a[j]<p &&j<last);
+   do(i--);
+   while(a[i]>p &&i>first);
+    if(j>=i) break;
+    else swap(a[i],a[j]);}
+ swap(a[first],a[i]);
+return i;
+}
+
+
+ void insertion(int  a[], int n) {
+for (int i = 1; i < n; i++) {
+int temp = a[i];
+int j;
+for (j = i-1; j >= 0 && temp < a[j]; j--)
+a[j+1] = a[j];
+a[j+1] = temp;
+}}
+
+
+void  algorithm_1(int  a[], int first,int last){
+ int n= last-first+1;
+ if (first>=last)return;
+ if( last-first<1000) insertion(a,last-first+1);
+ int p=partition(a,first,last);
+ algorithm_1(a,first,p-1);
+ algorithm_1(a,p+1,last);
+}
+
+
+void algorithm_C(int a[], int n) {
+  for(int k=0;k<n;k++){
+	  swap(a[rand()%n],a[rand()%n]);
+	}
+  algorithm_1(a,0,n-1);
+
+}
+
+
+// ----- DO NOT MODIFY THE CODE BELOW THIS ----- //
+
+void printArray(int a[], int n)
+{
+	for (int i = 0; i < n; i++)
+		printf("%d ", a[i]);
+	cout << endl;
+}
+
+bool is_sorted(int* a, int n) {
+	for (int i = 0; i < n-1; i++)
+		if (a[i] > a[i+1])
+			return false;
+	return true;
+}
+
+int main()
+{
+	int n;
+	int* rand_array;
+	int* sorted_array;
+	int* reversly_sorted_array;
+
+	for (int n = 300000; n <= 1200000; n *= 2) {
+		cout << endl << " ------- N = " << n << " ------ " << endl;
+		rand_array = new int[n];
+		sorted_array = new int[n];
+		reversly_sorted_array = new int[n];
+		
+		for (int i = 0; i < n; i++) {
+			int x = rand() % (n - 1);
+			rand_array[i] = x;
+			sorted_array[i] = i;
+		}
+		for (int i = n - 1, j = 0; i >= 0; i--, j++)
+			reversly_sorted_array[j] = i;
+
+		auto start1 = steady_clock::now();
+		algorithm_A(sorted_array, n);
+		auto stop1 = steady_clock::now();
+		auto duration1 = duration_cast<microseconds>(stop1 - start1);
+
+		if (!is_sorted(sorted_array, n))
+			cout << "ERROR: ALGORITH A DOES NOT SORT CORRECTLY!" << endl;
+		else cout << "Algorithm A (ascending):   " << duration1.count() / 1000.0 << " milliseconds" << endl;
+
+		start1 = steady_clock::now();
+		algorithm_A(reversly_sorted_array, n);
+		stop1 = steady_clock::now();
+		duration1 = duration_cast<microseconds>(stop1 - start1);
+		
+		if (!is_sorted(reversly_sorted_array, n))
+			cout << "ERROR: ALGORITH A DOES NOT SORT CORRECTLY!" << endl;
+		else cout << "Algorithm A (descending):  " << duration1.count() / 1000.0 << " milliseconds" << endl;
+
+		start1 = steady_clock::now();
+		algorithm_A(rand_array, n);
+		stop1 = steady_clock::now();
+		duration1 = duration_cast<microseconds>(stop1 - start1);
+		
+		if (!is_sorted(rand_array, n))
+			cout << "ERROR: ALGORITH A DOES NOT SORT CORRECTLY!" << endl;
+		else cout << "Algorithm A (random):      " << duration1.count() / 1000.0 << " milliseconds" << endl;
+		cout << endl;
+		//________________________________________________________
+
+		delete[] rand_array;
+		delete[] sorted_array;
+		delete[] reversly_sorted_array;
+
+		rand_array = new int[n];
+		sorted_array = new int[n];
+		reversly_sorted_array = new int[n];
+
+		for (int i = 0; i < n; i++) {
+			int x = rand() % (n - 1);
+			rand_array[i] = x;
+			sorted_array[i] = i;
+		}
+		for (int i = n - 1, j = 0; i >= 0; i--, j++)
+			reversly_sorted_array[j] = i;
+		
+		start1 = steady_clock::now();
+		algorithm_B(sorted_array, n);
+		stop1 = steady_clock::now();
+		duration1 = duration_cast<microseconds>(stop1 - start1);
+		
+		if (!is_sorted(sorted_array, n))
+			cout << "ERROR: ALGORITH B DOES NOT SORT CORRECTLY!" << endl;
+		else cout << "Algorithm B (ascending):   " << duration1.count() / 1000.0 << " milliseconds" << endl;
+
+		start1 = steady_clock::now();
+		algorithm_B(reversly_sorted_array, n);
+		stop1 = steady_clock::now();
+		duration1 = duration_cast<microseconds>(stop1 - start1);
+		
+		if (!is_sorted(reversly_sorted_array, n))
+			cout << "ERROR: ALGORITH B DOES NOT SORT CORRECTLY!" << endl;
+		else cout << "Algorithm B (descending):  " << duration1.count() / 1000.0 << " milliseconds" << endl;
+
+		start1 = steady_clock::now();
+		algorithm_B(rand_array, n);
+		stop1 = steady_clock::now();
+		duration1 = duration_cast<microseconds>(stop1 - start1);
+
+		if (!is_sorted(rand_array, n))
+			cout << "ERROR: ALGORITH B DOES NOT SORT CORRECTLY!" << endl;
+		else cout << "Algorithm B (random):      " << duration1.count() / 1000.0 << " milliseconds" << endl;
+		cout << endl;
+		//________________________________________________________
+
+		rand_array = new int[n];
+		sorted_array = new int[n];
+		reversly_sorted_array = new int[n];
+
+		for (int i = 0; i < n; i++) {
+			int x = rand() % (n - 1);
+			rand_array[i] = x;
+			sorted_array[i] = i;
+		}
+		for (int i = n - 1, j = 0; i >= 0; i--, j++)
+			reversly_sorted_array[j] = i;
+		
+		start1 = steady_clock::now();
+		algorithm_C(sorted_array, n);
+		stop1 = steady_clock::now();
+		duration1 = duration_cast<microseconds>(stop1 - start1);
+		
+		if (!is_sorted(sorted_array, n))
+			cout << "ERROR: ALGORITH C DOES NOT SORT CORRECTLY!" << endl;
+		else cout << "Algorithm C (ascending):   " << duration1.count() / 1000.0 << " milliseconds" << endl;
+
+		start1 = steady_clock::now();
+		algorithm_C(reversly_sorted_array, n);
+		stop1 = steady_clock::now();
+		duration1 = duration_cast<microseconds>(stop1 - start1);
+		
+		if (!is_sorted(reversly_sorted_array, n))
+			cout << "ERROR: ALGORITH C DOES NOT SORT CORRECTLY!" << endl;
+		else cout << "Algorithm C (descending):  " << duration1.count() / 1000.0 << " milliseconds" << endl;
+
+		start1 = steady_clock::now();
+		algorithm_C(rand_array, n);
+		stop1 = steady_clock::now();
+		duration1 = duration_cast<microseconds>(stop1 - start1);
+		
+		if (!is_sorted(rand_array, n))
+			cout << "ERROR: ALGORITH C DOES NOT SORT CORRECTLY!" << endl;
+		else cout << "Algorithm C (random):      " << duration1.count() / 1000.0 << " milliseconds" << endl;
+
+		delete[] rand_array;
+		delete[] sorted_array;
+		delete[] reversly_sorted_array;
+	}
+	
+	return 0;
+}
