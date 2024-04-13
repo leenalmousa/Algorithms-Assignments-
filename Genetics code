@@ -1,0 +1,32 @@
+#include <set>
+#include <string>
+#include <map>
+using namespace std;
+
+long long count_splits_rec(string gene, set<string> &fragments, map<string, long long> &dp) {
+    int size = gene.length();
+    if (dp.find(gene) != dp.end())
+        return dp[gene];
+    
+    long long ways = 0;
+    if (size == 0) // check if gene is empty return 1 i cant divide to more base case 
+        ways = 1;
+    
+  
+    for (auto it = fragments.begin(); it != fragments.end(); ++it) {
+        const string& fragment = *it;
+        int fragmentSize = fragment.size();
+
+        
+        if (size >= fragmentSize && gene.substr(0, fragmentSize) == fragment)
+            ways += count_splits_rec(gene.substr(fragmentSize), fragments, dp);
+    }
+
+    dp[gene] = ways;
+    return ways;
+}
+
+long long count_splits(string &gene, set<string>& fragments) {
+    map<string, long long> dp;
+    return count_splits_rec(gene, fragments, dp);
+}
