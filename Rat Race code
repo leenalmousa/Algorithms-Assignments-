@@ -1,0 +1,20 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+
+bool win(int x, int k) {
+    vector<bool> dp(x + 1, false);
+
+    // Base case: If x = 0 you lose cause opponent already finished 
+    dp[0] = false;
+
+    for (int i = 1; i <= x; ++i) {
+        if (i - 1 >= 0 && !dp[i - 1]) {
+            dp[i] = true; 
+        } else if (i - k >= 0 && !dp[i - k]) {
+            dp[i] = true;  
+        }
+    }
+
+    return dp[x];
+}
