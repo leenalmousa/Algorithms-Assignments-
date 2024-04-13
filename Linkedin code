@@ -151,3 +151,25 @@ void Closest(int n, int c, string names[], string companies_arr[], int edge1[], 
         cout << i;
     }
 }
+
+#include <string>
+
+int main(){
+
+    int N=8, C=10;
+
+	string names[8]={"Omar","Tuqa","Aesha","Ahmad","Ali","Salem","Sara","Firas"};
+	string companies[8]={"A","C","C","A","B","B","B","C"};
+	int from[10]={0,0,0,1,2,2,3,4,5,6};
+	int to[10]=  {1,2,7,4,3,5,6,7,6,7};
+
+
+   Closest(N,C,names,companies,from,to,"Omar");
+    //answer should be B C
+    cout<<endl;
+	Closest(N,C,names,companies,from,to,"Aesha");
+    //answer should be A B
+
+    
+	return 0;
+}
