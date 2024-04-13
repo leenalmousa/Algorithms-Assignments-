@@ -1,0 +1,55 @@
+#include <iostream>
+#include <vector>
+using namespace std;
+int c = 0;
+
+void merge(vector<int> &a, int first, int mid, int last, int result[]) {
+    int size = last - first + 1;
+    int i = first;
+    int j = mid + 1;
+
+    for (int k = 0; k < size; k++) {
+        if (i > mid) {
+            result[k] = a[j++];
+        } else if (j > last) {
+            result[k] = a[i++];
+        } else if (a[i] > a[j]) {
+            result[k] = a[j++];
+            c += mid - i + 1;
+        } else {
+            result[k] = a[i++];
+        }
+    }
+
+    for (int i = 0; i < size; i++) {
+        a[first + i] = result[i];
+    }
+}
+
+void mergesort(vector<int> &a, int first, int last, int result[]) {
+    if (first >= last) {
+        return;
+    }
+
+    int mid = first + (last - first) / 2;
+    mergesort(a, first, mid, result);
+    mergesort(a, mid + 1, last, result);
+    merge(a, first, mid, last, result);
+}
+
+int algorithm_B(vector<int> &v, int n) {
+    int x[n] = {0};
+    mergesort(v, 0, n - 1, x);
+    return c;
+}
+
+int main() {
+    int x;
+    vector<int> rankings;
+    while (cin >> x) {
+        rankings.push_back(x);
+    }
+
+    cout << algorithm_B(rankings, rankings.size());
+    return 0;
+}
