@@ -1,0 +1,153 @@
+#include <iostream>
+#include <string>
+#include <climits>
+#include <list>
+#include <algorithm>
+#include <vector>
+#include <queue>
+#include <map>
+
+using namespace std;
+
+class Edge {
+public:
+    int from;
+    int to;
+
+    Edge(int from, int to) {
+        this->from = from;
+        this->to = to;
+    }
+};
+
+class Graph {
+public:
+    int V;
+    list<Edge> *adj;
+    string *company;
+
+    Graph(int V) {
+        this->V = V;
+        adj = new list<Edge>[V];
+        company = new string[V];
+    }
+
+    ~Graph() {
+        delete[] adj;
+        delete[] company;
+    }
+
+    void add_edge(int v, int w) {
+        adj[v].push_back(Edge(v, w));
+        adj[w].push_back(Edge(w, v));
+    }
+
+    bool has_edge(int v, int w) const {
+        for (Edge edge : adj[v])
+            if (edge.to == w)
+                return true;
+        return false;
+    }
+
+    bool is_connected(int source) {
+        int sum = 0;
+        for (Edge i : adj[source]) {
+            if (company[i.to] != company[source])
+                sum += 1;
+        }
+        return sum != 0;
+    }
+
+    void print() const {
+        for (int v = 0; v < V; v++) {
+            cout << "[" << v << "]  "
+                 << " company:" << company; // shouldnt we specify which vertex
+            for (Edge edge : adj[v])
+                cout << edge.to << ", ";
+            cout << endl;
+        }
+    }
+
+    vector<string> BFT(int source, map<string, int> freq) {
+        bool *marked = new bool[V];
+        int *parent = new int[V];
+        int *dist = new int[V]; // distance
+
+        int maxFreq = -1;
+        vector<string> compMax;
+
+        for (int u = 0; u < V; u++) {
+            marked[u] = false;
+            parent[u] = -1;
+            dist[u] = INT_MAX;
+        }
+
+        marked[source] = true;
+        dist[source] = 0;
+
+        queue<int> q;
+        q.push(source);
+
+        while (!q.empty()) {
+            int v = q.front();
+            q.pop();
+
+            for (Edge w : adj[v]) {
+                if (!marked[w.to]) {
+                    marked[w.to] = true;
+                    if (freq.find(company[w.to]) != freq.end()) {
+                        freq[company[w.to]]++;
+                    } else {
+                        freq.insert(make_pair(company[w.to], 1));
+                    }
+                    dist[w.to] = dist[v] + 1;
+                    parent[w.to] = v;
+                    if (dist[v] < 1)
+                        q.push(w.to);
+                }
+            };
+        }
+
+        for (auto i : freq) {
+            if (i.second > maxFreq)
+                maxFreq = i.second;
+        }
+
+        if (maxFreq != -1)
+            for (auto i : freq) {
+                if (i.second == maxFreq && i.first != company[source])
+                    compMax.push_back(i.first);
+            }
+
+        delete[] marked;
+        delete[] parent;
+        delete[] dist;
+        return compMax;
+    }
+};
+
+void Closest(int n, int c, string names[], string companies_arr[], int edge1[], int edge2[], string name) {
+    Graph linkedin(n);
+
+    for (int i = 0; i < n; i++) {
+        linkedin.company[i] = companies_arr[i];
+    }
+
+    int index;
+    for (int i = 0; i < n; i++)
+        if (name == names[i])
+            index = i;
+
+    for (int i = 0; i < c; i++) {
+        linkedin.add_edge(edge1[i], edge2[i]);
+    }
+
+    map<string, int> freq;
+    if (linkedin.is_connected(index) == 0)
+        cout << "Not Connected";
+    vector<string> ans = linkedin.BFT(index, freq);
+    sort(ans.begin(), ans.end());
+    for (string i : ans) {
+        cout << i;
+    }
+}
