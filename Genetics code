@@ -30,3 +30,13 @@ long long count_splits(string &gene, set<string>& fragments) {
     map<string, long long> dp;
     return count_splits_rec(gene, fragments, dp);
 }
+
+
+int main(){
+  string gene1 = "GATTAG";
+    set<string> fragments1 = {"G", "GA", "GAT", "AG", "AGT", "AT", "ATTA", "AT", "TA", "TAG"};
+    cout << "Example 1: " << count_splits(gene1, fragments1) << " ways\n";
+
+ 
+    return 0;
+}
