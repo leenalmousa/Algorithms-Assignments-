@@ -1,0 +1,53 @@
+#include <climits>
+#include <algorithm>
+#include <vector>
+#include <iostream>
+using namespace std;
+
+int min_ma3moul_rec(int **ma3moul, int **money, int i, int j, int max_amount, vector<vector<vector<int>>>& dp) {
+    int left = INT_MAX;
+    int up = INT_MAX;
+    int diagonal = INT_MAX;
+
+    if (dp[i][j][max_amount] != -1) {
+        return dp[i][j][max_amount]; // check if solved or not 
+    }
+
+    if (max_amount - money[i][j] < 0) {
+        dp[i][j][max_amount] = INT_MAX; // check if currently have the amount of money  if not return max
+        return dp[i][j][max_amount];
+    }
+
+    if ((i == 0) && (j == 0)) {
+        // cant return aftersubtraction
+        dp[i][j][max_amount] = ma3moul[0][0]; // if i am in the base case return the ma3moul in 00
+        return dp[i][j][max_amount];
+    }
+
+    // calculate the neighbors 
+    if ((j != 0) && (i != 0) && (ma3moul[i - 1][j - 1] >= 0))
+        diagonal = min_ma3moul_rec(ma3moul, money, i - 1, j - 1, max_amount - money[i][j], dp);
+    if ((i != 0) && (ma3moul[i - 1][j] >= 0))
+        up = min_ma3moul_rec(ma3moul, money, i - 1, j, max_amount - money[i][j], dp);
+    if ((j != 0) && (ma3moul[i][j - 1] >= 0))
+        left = min_ma3moul_rec(ma3moul, money, i, j - 1, max_amount - money[i][j], dp);
+
+    // choose the minimum between neighbors and add the ma3moul in the current  house
+    dp[i][j][max_amount] = min(min(left, up), diagonal);
+    if (dp[i][j][max_amount] != INT_MAX)
+        dp[i][j][max_amount] += ma3moul[i][j];
+
+    return dp[i][j][max_amount];
+}
+
+int min_ma3moul(int **ma3moul, int **money, int i, int j, int K) {
+    vector<vector<vector<int>>> dp(i, vector<vector<int>>(j, vector<int>(K + 1, -1)));
+    if (i <= 0 || j <= 0 || K <= 0) {
+        return 0;
+    }
+    i--;
+    j--;
+    min_ma3moul_rec(ma3moul, money, i, j, K, dp);
+
+    return dp[i][j][K];
+}
