@@ -74,3 +74,11 @@ string which_tanks(int n, int d[], double v[]) {
     reverse(result.begin(), result.end());
     return result;
 }
+
+int main() {
+int d[] = {1,   2,   3, 4} ;
+ double v[] = {1.5,3,.5,2.75};
+ cout<<max_loss(4,d,v)<<endl;
+ cout<<which_tanks(6,d,v);
+    return 0;
+}
