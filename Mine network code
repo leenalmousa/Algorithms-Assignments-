@@ -320,3 +320,16 @@ double GetMinRoadsNetworkCost(int N, double latitude[], double longitude[], doub
     double distance = gr.MST();
     return distance;
 }
+
+int main(){
+
+	int N=5;
+
+	double latitudes[]={40.6943,34.1141,41.8375,25.784,32.7935};
+	double longitudes[]={-73.9249,-118.4068,-87.6866,-80.2101,-96.7667};
+
+
+	cout<<GetMinRoadsNetworkCost  (N,latitudes,longitudes,39.6943);
+    // result should be 10088.2
+	return 0;
+}
