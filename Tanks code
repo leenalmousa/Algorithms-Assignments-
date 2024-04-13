@@ -1,0 +1,76 @@
+#include <iostream>
+#include <algorithm>
+#include <vector>
+#include <string>
+
+using namespace std;
+
+int next(int d[], int n) {
+    int i = n;
+    while (i > -1) {
+        if (d[n] - d[i] > 100)
+            return i;
+        i--;
+    }
+    return -1;
+}
+
+double max_loss(int n, int d[], double v[]) {
+    if (n == 1)
+        return v[0];
+    
+    vector<double> array(n, 0);
+    double value;
+
+    for (int i = 0; i < n; i++) {
+        if (next(d, i) == -1)
+            value = 0;
+        else
+            value = array[next(d, i)];
+
+        if (i == 0)
+            array[0] = v[0];
+        else
+            array[i] = max(value + v[i], array[i - 1]);
+    }
+    return array[n - 1];
+}
+
+string which_tanks(int n, int d[], double v[]) {
+    string result = "";
+
+    vector<double> array(n, 0);
+    double value;
+
+    for (int i = 0; i < n; i++) {
+        if (next(d, i) == -1)
+            value = 0;
+        else
+            value = array[next(d, i)];
+
+        if (i == 0)
+            array[0] = v[0];
+        else
+            array[i] = max(value + v[i], array[i - 1]);
+    }
+
+    int i = n - 1;
+    while (i >= 0) {
+        if (array[i] - array[i - 1] == 0) {
+            i--;
+            result = result + '0';
+        } else {
+            result = result + '1';
+            for (int j = i - 1; j > next(d, i); j--) {
+                result = result + '0';
+            }
+            i = next(d, i);
+        }
+
+        for (long long i = 0; i < array.size(); i++) {
+            cout << array[i];
+        }
+    }
+    reverse(result.begin(), result.end());
+    return result;
+}
